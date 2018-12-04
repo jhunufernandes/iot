@@ -1,0 +1,12 @@
+---
+title: "Sobre o Projeto"
+output: html_document
+runtime: shiny 
+---
+
+
+
+#### A medição da qualidade do ar na região metropolitana de São Paulo é de responsabilidade da CETESB, porém esta possui poucas estações de medição. Isso acaba gerando uma baixa resolução espacial, implicando que a qualidade do ar que respiramos nem sempre é aquela que a CETESB divulga. Ora, o ar que um pedestre respira num cruzamento de duas vias movimentadas não terá a mesma qualidade do ar que uma pessoa respira dentro de seu apartamento que fica numa rua menos movimentada a três quadras de distância do cruzamento.
+   
+#### Assim, o objetivo deste projeto é analisar as diferentes formas de poluição em microambientes fazendo o uso de dispositivos que medem em tempo real os níveis de gás carbônico, temperatura, umidade e ruído. Atualmente está se medindo apenas os índices de gás carbônico e temperatura. As informações coletadas por estes dispositivos são enviadas à nuvem onde são realizadas diversas análises e diversos gráficos e mapas são gerados. Todos os resultados são disponibilisados neste aplicativo.  
+  

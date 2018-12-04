@@ -1,0 +1,145 @@
+---
+title: "ANÁLISE DOS RESULTADOS"
+author: "IPT"
+date: ''
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+#knitr::opts_chunk$set(echo = TRUE)
+
+setwd("/home/laftos/Projetos/Monitoramento")
+#setwd("D:/Users/larrubia/OneDrive - IPT/Projetos/Monitoramento")
+
+source("Codigos/pacotes.R")
+source("Codigos/func_auxiliar.R")
+source("Codigos/func_carregaDados.R")
+source("Codigos/func_corrigeDados.R")
+source("Codigos/func_estatisticas.R")
+source("Codigos/func_visualizacao.R")
+source("Codigos/func_interface.R")
+
+tabEvento = readRDS("Dados/dadosEvento.rds")
+inicioMax = as.Date("2017-11-14")
+fimMax = as.Date(now())
+
+tabHora = transfConsumoMedidoHora(tabEvento, inicioMax, fimMax)
+tabPeriodo = transfConsumoMedidoPeriodo(tabHora)
+tabDia = transfConsumoMedidoDia(tabHora)
+
+```
+
+Apresentamos aqui alguns resultados observados no padrão de consumo de água no local em que o projeto piloto está sendo executado.  
+
+## Análise dos pontos monitorados 
+O objetivo dessa seção é fazer uma análise descritiva (individual e conjunta) dos pontos monitorados e, assim, tentar encontrar um certo padrão no consumo de água e uso do ambiente. Ao todo, são analisados 4 conjuntos de pontos de monitoramento: 
+
+  * Torneiras (3 pontos monitorados);
+  * Mictórios (3 pontos monitorados);
+  * Vasos (4 pontos monitorados);
+  * Contador de pessoas (1 ponto monitorado).
+  
+Os dados analisados compreende o perído de `r paste(format(inicioMax, format="%d de %B de %Y"))` a `r paste(format(fimMax, format="%d de %B de %Y"))`.
+
+### Consumo das torneiras
+```{r include=FALSE}
+# Com ZERO
+grupHora = subset(tabHora, tabHora$LOCAL == "torneira")
+mediaHora = mean(grupHora$VOLUME)
+mediaHoraHorario = aggregate(grupHora$VOLUME, list(hour(grupHora$HORA_REF)), mean)
+#names(mediaHoraHorario) = c("Hora", "Consumo Médio (litros/hora)")
+mediaHoraPeriodo = aggregate(grupHora$VOLUME, list(grupHora$PERIODO), mean)
+mediaHoraDiaSema = aggregate(grupHora$VOLUME, list(grupHora$DIA_SEM), mean)
+mediaHoraPeriodoDiaSema = aggregate(grupHora$VOLUME, list(grupHora$PERIODO, grupHora$DIA_SEM), mean)
+
+grf1 = ggplot(grupHora, aes(x=DIA_SEM, y=VOLUME, fill=PERIODO)) + 
+    geom_boxplot() +
+    labs(title="CONSUMO POR DIA DA SEMANA E PERIODO DO DIA", x = "Dia da Semana", y = "Volume (Litros/Hora)") +
+    theme_classic()
+
+
+#Sem ZERO
+
+grupHora0 = subset(tabHora, tabHora$LOCAL == "torneira" & tabHora$VOLUME > 0)
+mediaHora0 = mean(grupHora0$VOLUME)
+mediaHoraHorario0 = aggregate(grupHora0$VOLUME, list(hour(grupHora0$HORA_REF)), mean)
+mediaHoraPeriodo0 = aggregate(grupHora0$VOLUME, list(grupHora0$PERIODO), mean)
+mediaHoraDiaSema0 = aggregate(grupHora0$VOLUME, list(grupHora0$DIA_SEM), mean)
+mediaHoraPeriodoDiaSema0 = aggregate(grupHora0$VOLUME, list(grupHora0$PERIODO, grupHora0$DIA_SEM), mean)
+
+
+grf1 = ggplot(grupHora0, aes(x=DIA_SEM, y=VOLUME, fill=PERIODO)) + 
+  geom_boxplot() +
+  labs(title="CONSUMO POR DIA DA SEMANA E PERIODO DO DIA", x = "Dia da Semana", y = "Volume (Litros/Hora)") +
+  theme_classic()
+
+
+```
+
+As torneiras apresentam um consumo médio de `r paste (formatar2(mediaHora, 3), "litros por hora")`, porém quando desconsideramos os horários nos quais o consumo foi nulo, teremos um consumo médio de `r paste (formatar2(mediaHora0, 3), "litros por hora")`. Nos gráficos abaixo podemos observar o consumo médio desagregado por horário do dia, período do dia e dia da semana.
+
+
+Table Header | Second Header
+------------- | -------------
+Table Cell | Cell 2
+Cell 3 | Cell 4 
+
+```{r echo = FALSE, warning = FALSE, error = FALSE, fig.show='hold',fig.align='center'}
+plotBarraPlotly(mediaHoraHorario$x, mediaHoraHorario$Group.1, ylab = "Consumo (litros/hora)", xlab = "Horário do dia", main = "Consumo médio por horário do dia", rend = 2)
+
+plotBarraPlotly(mediaHoraPeriodo$x, mediaHoraPeriodo$Group.1, ylab = "Consumo (litros/hora)", xlab = "Período do dia", main = "Consumo médio por período do dia", rend = 2)
+
+plotBarraPlotly(mediaHoraDiaSema$x, mediaHoraDiaSema$Group.1, ylab = "Consumo (litros/hora)", xlab = "Dia da semana", main = "Consumo médio por dia da semana", rend = 2)
+
+# kable(mediaHoraHorario, col.names = c("Horário", "Consumo Médio (litros/hora)"),align = "c",  booktabs = TRUE, digits = 2,
+#       caption = "Média de consumo em litros/hora por horário do dia", format.args = list(decimal.mark = ",", big.mark = "'"))
+
+```
+
+### Consumo dos mictórios
+
+### Consumo dos vasos
+
+### Consumo global
+
+### Frequência de pessoas
+
+## Padrão de consumo entre os pontos monitorados
+
+### Frequência de pessoas e consumo das torneiras
+
+```{r}
+Grup1Hora = subset(tabHora, tabHora$LOCAL=="pess")
+Grup2Hora = subset(tabHora, tabHora$LOCAL=="mictorio")
+
+tabAnalise = merge(Grup1Hora, Grup2Hora, "HORA_REF", all = T)
+
+corPear = cor(tabAnalise$VOLUME.x, tabAnalise$VOLUME.y, method = c("pearson"), use = "complete.obs" )
+corKend = cor(tabAnalise$VOLUME.x, tabAnalise$VOLUME.y, method = c("kendall"), use = "complete.obs" )
+corSpea = cor(tabAnalise$VOLUME.x, tabAnalise$VOLUME.y, method = c("spearman"), use = "complete.obs" )
+
+mod = lm(tabAnalise$VOLUME.y ~ (tabAnalise$VOLUME.x) -1)
+
+grf1 = ggplot(tabAnalise, aes(x=VOLUME.x, y=VOLUME.y)) + 
+  geom_point() +
+  geom_abline(intercept = 0, slope = mod$coefficients) +
+  labs(title="CONSUMO DAS TORNEIRAS x FREQUÊNCIA DE PESSOAS", x = "Frequência de pessoas", y = "Volume (Litros/Hora)") +
+  theme_bw()
+
+tabAnalise0 = subset(tabAnalise, tabAnalise$VOLUME.x>0 & tabAnalise$VOLUME.y>0)
+
+```
+
+
+### Frequência de pessoas e consumo dos mictórios
+
+### Frequência de pessoas e consumo dos mictórios
+
+### Frequência de pessoas e consumo global
+
+```{r pressure, echo=FALSE}
+```
+
